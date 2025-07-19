@@ -19,7 +19,6 @@ echo '========================================================================'
 echo "已进入项目专属的 MSYS2 环境 ($MSYSTEM)"
 echo "MSYS2 Root   : $PROJECT_MSYS2_ROOT_PATH"
 echo "MSYS2 DB     : $PROJECT_MSYS2_DB_PATH"
-echo "MSYS2 Cache  : $PROJECT_MSYS2_CACHE_PATH"
 echo '------------------------------------------------------------------------'
 echo '`pacman` 命令已被封装，将自动使用本项目的路径。'
 echo '环境已就绪。'
@@ -29,7 +28,6 @@ echo '========================================================================'
 pacman() {
     command pacman --root="$PROJECT_MSYS2_ROOT_PATH" \
                    --dbpath="$PROJECT_MSYS2_DB_PATH" \
-                   --cachedir="$PROJECT_MSYS2_CACHE_PATH" \
                    "$@"
 }
 
@@ -54,7 +52,6 @@ $projectRoot = $PSScriptRoot
 $msys2BaseDir = Join-Path -Path $projectRoot -ChildPath "msys2"
 $msys2RootDir = Join-Path -Path $msys2BaseDir -ChildPath "msys2_root"
 $msys2DbDir = Join-Path -Path $msys2BaseDir -ChildPath "msys2_db"
-$msys2CacheDir = Join-Path -Path $msys2BaseDir -ChildPath "msys2_cache"
 
 # 验证必要的目录和配置文件是否存在，确保环境已被正确初始化
 $bashProfile = Join-Path -Path $projectRoot -ChildPath ".msys2_bash_profile"
@@ -80,7 +77,6 @@ Function ConvertTo-Msys2Path {{
 # 设置环境变量，这些变量将被传递给 bash 进程，并由 .msys2_bash_profile 文件使用
 $env:PROJECT_MSYS2_ROOT_PATH = ConvertTo-Msys2Path -WindowsPath $msys2RootDir
 $env:PROJECT_MSYS2_DB_PATH = ConvertTo-Msys2Path -WindowsPath $msys2DbDir
-$env:PROJECT_MSYS2_CACHE_PATH = ConvertTo-Msys2Path -WindowsPath $msys2CacheDir
 
 # 获取 bash 启动配置文件的 MSYS2 格式路径
 $bashProfileMsys = ConvertTo-Msys2Path -WindowsPath $bashProfile
@@ -140,14 +136,12 @@ def main():
 
     msys2_base_dir = project_dir / "msys2"
     msys2_root_dir = msys2_base_dir / "msys2_root"
-    msys2_cache_dir = msys2_base_dir / "msys2_cache"
     msys2_db_dir = msys2_base_dir / "msys2_db"
 
     print("正在创建/验证目录结构...")
     try:
         # 这些目录对于所有环境都是共享的
         os.makedirs(msys2_root_dir, exist_ok=True)
-        os.makedirs(msys2_cache_dir, exist_ok=True)
         os.makedirs(msys2_db_dir, exist_ok=True)
     except OSError as e:
         print(f"错误: 创建目录时失败: {e}")
@@ -182,13 +176,11 @@ def main():
         
         root_path_msys = convert_to_msys_path(msys2_root_dir)
         db_path_msys = convert_to_msys_path(msys2_db_dir)
-        cache_path_msys = convert_to_msys_path(msys2_cache_dir)
         
         pacman_command = (
             f"pacman -Sy --noconfirm "
             f"--root='{root_path_msys}' "
-            f"--dbpath='{db_path_msys}' "
-            f"--cachedir='{cache_path_msys}'"
+            f"--dbpath='{db_path_msys}'"
         )
         
         # 使用选择的环境启动器
